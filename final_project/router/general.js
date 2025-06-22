@@ -35,42 +35,82 @@ const doesExist = (username) => {
     }
 }
 
+// Función que retorna libros como promesa
+const getBookReview = (isbn) => {
+    return new Promise((resolve, reject) => {
+        const book = books[isbn];
+        if (book && book.reviews) {
+            resolve(book.reviews);
+        } else {
+            reject("No se encontraron reseñas para ese ISBN.");
+        }
+    });
+};
+
 // Get the book list available in the shop
+const getBooks = () => {
+    return new Promise((resolve, reject) => {
+        resolve(books);
+    });
+};
 public_users.get('/',function (req, res) {
-    res.send(JSON.stringify(books,null,4));
+    getBooks()
+    .then(data => res.status(200).json(data))
+    .catch(err => res.status(500).json({ message: err }));    
 });
 
 // Get book details based on ISBN
+const getBookByISBN = (isbn) => {
+    return new Promise((resolve, reject) => {
+        const book = books[isbn];
+        if (book) {
+            resolve(book);
+        } else {
+            reject("Libro no encontrado");
+        }
+    });
+};
 public_users.get('/isbn/:isbn',function (req, res) {
-    const isbn = req.params.isbn;
-    res.send(books[isbn]);
+    getBookByISBN(req.params.isbn)
+    .then(data => res.status(200).json(data))
+    .catch(err => res.status(404).json({ message: err }));
  });
   
 // Get book details based on author
+const getBooksByAuthor = (author) => {
+    return new Promise((resolve) => {
+        const result = Object.entries(books)
+            .filter(([id, libro]) => libro.author.toLowerCase().includes(author.toLowerCase()))
+            .map(([id, libro]) => ({ id, ...libro }));
+        resolve(result);
+    });
+};
 public_users.get('/author/:author',function (req, res) {
-    const author = req.params.author;
-    const autor =Object.entries(books)
-    .filter(([id, libro]) => libro.author.toLowerCase().includes(author.toLowerCase()))
-    .map(([id, libro]) => ({ id, ...libro }));
-    res.send(autor);
+    getBooksByAuthor(req.params.author)
+        .then(data => res.status(200).json(data))
+        .catch(err => res.status(500).json({ message: err }));
 });
 
 // Get all books based on title
+const getBooksByTitle = (title) => {
+    return new Promise((resolve) => {
+        const result = Object.entries(books)
+            .filter(([id, libro]) => libro.title.toLowerCase().includes(title.toLowerCase()))
+            .map(([id, libro]) => ({ id, ...libro }));
+        resolve(result);
+    });
+};
 public_users.get('/title/:title',function (req, res) {
-    const title = req.params.title;
-    const titulo =Object.entries(books)
-    .filter(([id, libro]) => libro.title.toLowerCase().includes(title.toLowerCase()))
-    .map(([id, libro]) => ({ id, ...libro }));
-    res.send(titulo);
+    getBooksByTitle(req.params.title)
+        .then(data => res.status(200).json(data))
+        .catch(err => res.status(500).json({ message: err }));    
 });
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
-    const isbn = req.params.isbn;
-    const resumen =Object.entries(books)
-    .filter(([id, libro]) => id===isbn)
-    .map(([id, libro]) => ({ id, ...libro }));
-    res.send(resumen);
+    getBookReview(req.params.isbn)
+        .then(data => res.status(200).json(data))
+        .catch(err => res.status(404).json({ message: err }));    
 });
 
 module.exports.general = public_users;
