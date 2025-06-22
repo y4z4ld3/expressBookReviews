@@ -24,23 +24,28 @@ public_users.get('/isbn/:isbn',function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
     const author = req.params.author;
-    res.send(
-        Object.entries(books)
-        .filter(([id, libro]) => libro.author.toLowerCase() === author.toLowerCase())
-        .map(([id, libro]) => ({ id, ...libro }))
-    );
+    const autor =Object.entries(books)
+    .filter(([id, libro]) => libro.author.toLowerCase().includes(author.toLowerCase()))
+    .map(([id, libro]) => ({ id, ...libro }));
+    res.send(autor);
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const title = req.params.title;
+    const titulo =Object.entries(books)
+    .filter(([id, libro]) => libro.title.toLowerCase().includes(title.toLowerCase()))
+    .map(([id, libro]) => ({ id, ...libro }));
+    res.send(titulo);
 });
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const isbn = req.params.isbn;
+    const resumen =Object.entries(books)
+    .filter(([id, libro]) => id===isbn)
+    .map(([id, libro]) => ({ id, ...libro }));
+    res.send(resumen);
 });
 
 module.exports.general = public_users;
